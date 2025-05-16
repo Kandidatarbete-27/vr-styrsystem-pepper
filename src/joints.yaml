@@ -1,0 +1,60 @@
+HeadYaw:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-2.0857, 2.0857]
+HeadPitch:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-0.7068, 0.6371] 
+LShoulderPitch:
+  value: 0.0
+  speed: 0.1
+  current_value: 0.0
+  limits: [-2.0857, 2.0857]
+LShoulderRoll:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [0.0087, 1.5620]
+LElbowYaw:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-2.0857, 2.0857]
+LElbowRoll:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-1.5620, -0.0087]
+LWristYaw:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-1.8239, 1.8239]
+RShoulderPitch:
+  value: 0.0
+  speed: 0.1
+  current_value: 0.0
+  limits: [-2.0857, 2.0857]
+RShoulderRoll:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-1.5620, -0.0087]
+RElbowYaw:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-2.0857, 2.0857]
+RElbowRoll:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [0.0087, 1.5620]
+RWristYaw:
+  value: 0.0
+  speed: 0.5
+  current_value: 0.0
+  limits: [-1.8239, 1.8239]

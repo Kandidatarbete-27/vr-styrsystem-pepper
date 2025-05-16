@@ -1,0 +1,15 @@
+X:
+  value: 0
+  speed: 0.5
+  current_value: 0
+  limits: [2, 2]
+Y:
+  value: 0
+  speed: 0.5
+  current_value: 0
+  limits: [2, 2]
+Z:
+  value: 0
+  speed: 0.5
+  current_value: 0
+  limits: [2, 2]
