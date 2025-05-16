@@ -3,6 +3,7 @@ import yaml
 import threading
 import config as cfg
 
+# Class for controlling the head of Pepper
 class Head:
     def __init__(self, queue):
         self.angleValues = [0] * 2
@@ -16,8 +17,7 @@ class Head:
             print(e)
             return
         self.queue = queue
-        
-
+    
         self.main()
 
     def moveHead(self, data):

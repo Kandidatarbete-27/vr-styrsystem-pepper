@@ -3,6 +3,11 @@ import pyaudio
 import keyboard
 import numpy as np
 
+
+"""
+File not used in this version of the project.
+"""
+
 class Audio:
     def __init__(self, broker, ip, port):
         self.broker = broker

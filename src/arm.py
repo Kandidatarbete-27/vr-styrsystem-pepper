@@ -2,6 +2,12 @@ import naoqi as nq
 import config as cfg
 import time
 
+"""
+A PD regulator for the arms are implemented but not used in this version.
+The regulator is not correctly implemented.
+Code will be left here for future reference and improvements.
+"""
+
 MIN_SPEED = 0.2
 MAX_SPEED = 0.6
 
@@ -11,7 +17,7 @@ KP = 0.3
 KD = 0.1
 EPSILON = 1e-6
 
-
+# Class for controlling the left arm of Pepper
 class LArm:
     def __init__(self, queue):
         self.angleValues = [0] * 6
@@ -90,6 +96,7 @@ class LArm:
                     break
                 self.move(data)
 
+# Class for controlling the right arm of Pepper
 class RArm:
     def __init__(self, queue):
         self.angleValues = [0] * 6
