@@ -12,9 +12,9 @@ class Video:
     def __init__(self, broker, ip, port):
         self.broker = broker
         self.video = naoqi.ALProxy("ALVideoDevice", ip, port)
-        self.resolution = 14
-        self.colorSpace = 11
-        self.fps = 15
+        self.resolution = 14     # sets resolution, please check the documentation for available options
+        self.colorSpace = 11     
+        self.fps = 15            #  0 - 15 fps 
         self.cameraID = 3 #3 is eyes, 0 is top camera and 1 is bottom camera, 2 is depth camera
         self.nameID = self.video.subscribeCamera("python_client", self.cameraID, self.resolution, self.colorSpace, self.fps)
         self.image = None
@@ -43,14 +43,12 @@ class Video:
                 break
         cv2.destroyAllWindows()
 
-
 def run_video(broker, ip, port):
     video = Video(broker, ip, port)
     video.display_video()
     video.release()
 
-
-# Test, no need to to touch this
+# Test, if this script is run directly
 if __name__ == "__main__":
 
     LOCAL_IP = "0.0.0.0"

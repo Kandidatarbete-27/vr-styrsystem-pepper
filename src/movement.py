@@ -3,7 +3,8 @@ import config as cfg
 import math
 import time
 
-FIXED_HEIGHT = True # Set to True if you want to fix the height of the robot
+# Set to True if you want to make the robot fix its height after self balancing
+FIXED_HEIGHT = True 
 
 class Movement:
     def __init__(self, queue):
@@ -21,10 +22,7 @@ class Movement:
         self.prev_time = time.time()
 
         if FIXED_HEIGHT:
-            # turn of self balancing
-            #self.motion_handler.setStiffnesses("Body", 1)  # turn off stiffness
-            print("Fixed height")
-            # set stiffness of body to 0.0 to turn off self balancing
+            print("Fixed height enabled")
 
         self.main()
 
@@ -63,11 +61,8 @@ class Movement:
         ]
 
     def move(self, data):
-        #print("in move")
-        # maybe handle data
         self.want_pos = [data["z"], data["x"], data["theta"]]
         self.position = self.read_position()
-        #self.position[2] = self.
         self.calculate_coordinates_error(self.position, self.want_pos)
         
         #PD controller variables
@@ -97,24 +92,16 @@ class Movement:
         else:
             self.speed[2] = kp_theta * self.coordinates_error[2] - kd_theta * dtheta
 
-        #print("position", self.position[2])
-        #print("Want position", self.want_pos[2])
-        #print("Speed", self.speed[2])
-
         self.prev_time = current_time
         self.prev_position = self.position
         self.motion_handler.move(self.speed[0], self.speed[1], self.speed[2])
 
-        #fix height
+        #fix height in loop
         if FIXED_HEIGHT: 
-            #print("Fixing height")
             data_names = ["HipRoll", "HipPitch", "KneePitch"]
             values = [0] * 3
             speeds = [0.75] * 3
             self.motion_handler.setAngles(data_names, values, speeds)  # set angles to 0
-            #self.motion_handler.setStiffnesses(data_names, 1) # set stiffness to 0.0 to turn off self balancing
-        #set position of height too, "y" is the height
-
 
     def main(self):
         last_data = {"x": 0, "y": 0, "theta": 0, "z": 0}

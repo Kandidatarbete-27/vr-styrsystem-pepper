@@ -1,17 +1,16 @@
 import naoqi
-#import keyboard
 import multiprocessing as mp
 import head
 import arm
 import movement
 
-#GLOBAL VARIABLE FOR DEBUGGING
+#GLOBAL VARIABLES FOR DEBUGGING - for running whole system set all to True
 _HEAD = True
 _R_ARM = True
 _L_ARM = True
 _MOVEMENT = True
 
-
+# Class for handling the motion of the robot by starting subprocesses and sending data to them through queues/pipes
 class Motion:
     # Init 
     def __init__(self, broker, ip, port):
@@ -22,7 +21,6 @@ class Motion:
             print("Could not create proxy to ALMotion in motion.py")
             print(e)
                 
-
         if _HEAD:
             self.head_queue = mp.Queue()
             self.head_process = mp.Process(target=head.Head, args=(self.head_queue,))
@@ -39,9 +37,7 @@ class Motion:
             self.movement_queue = mp.Queue()
             self.movement_process = mp.Process(target=movement.Movement, args=(self.movement_queue,))
 
-
         self.start()
-        #self.shutdown()
 
     def start(self):
         print("Starting wake up")
@@ -86,23 +82,14 @@ class Motion:
             self.movement_process.join()
             self.movement_queue.close()
             self.movement_queue.join_thread()
-        
-        
-
+    
             
     def set_motion_data(self, data):
-        #print(data)
-        #if data is None:
-        #    print("no data recived before checking type....")
-        #    return
-        
-        _type = data.pop("type")
 
-        #print("Type: ", _type)
+        _type = data.pop("type")
 
         if _type == "head" and _HEAD:
             self.head_queue.put(data, block=False)
-            #print(data)
         elif _type == "rightArm" and _R_ARM:
             self.right_arm_queue.put(data, block=False)
         elif _type == "leftArm" and _L_ARM:

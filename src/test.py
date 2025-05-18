@@ -1,3 +1,10 @@
+"""
+This script was made during development 
+
+It is not used in the final version
+
+"""
+
 from naoqi import ALProxy, ALModule, ALBroker
 import time
 import numpy as np

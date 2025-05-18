@@ -12,25 +12,20 @@ import time
 import threading
 
 
-#local imports for selfmade modules
+#local imports from selfmade modules
 import config as cfg           
 import motions as M
 import video as V
 import com
 import pepperaudiofeed as A
 
-import multiprocessing as mp
-
-
 #GLOBAL VARIABLES
-broker = None
+broker = None # broker init for program to connect to pepper
 
-AUDIO = True #set to true if you want to use audio feed
-
+AUDIO = True #set to true if you want to receive audio feed
 
 def init_connection():
     global broker
-
     # Initialize the broker
     try:
         broker = nq.ALBroker("pythonBroker", cfg.LOCAL_IP, cfg.LOCAL_PORT, cfg.PEPPER_IP, cfg.PEPPER_PORT)
@@ -40,7 +35,6 @@ def init_connection():
         print(e)
         sys.exit(1)
     
-
 def run_video(queue):
     global video_handler, broker, video_com_handler
     try:
@@ -74,7 +68,6 @@ def run_video(queue):
         if queue.qsize() > 0:
             data = queue.get()
             if data == "stop":
-                #do stop stuff
                 break
 
     video_handler.release()
@@ -104,8 +97,6 @@ def main():
             time.sleep(1)
 
     motion_handler = M.Motion(broker, cfg.PEPPER_IP, cfg.PEPPER_PORT)
-    #camera_proxy = nq.ALProxy("ALVideoDevice", cfg.PEPPER_IP, cfg.PEPPER_PORT) 
-    #camera_proxy.setResolution("camera", 2) 
 
     def quit():
         #end all processes
@@ -116,27 +107,20 @@ def main():
         motion_handler.shutdown() #end motion process
         print("stoped")
         sys.exit(0)    
-        
-
 
     def check_if_esc_pressed():
         while True:
             if keyboard.is_pressed("esc"):
                 quit()
                 break
-            #time.sleep(0.1)
-
 
     esc_thread = threading.Thread(target=check_if_esc_pressed)
     esc_thread.start()
 
-
     print("starting loop in pepper.py")  
     while True:   
-
         # get data from vr
         data = motion_com.receive_json_3()
-        #print("recieved data:", data)
         if data["type"] == "quit" :
             quit()
             break

@@ -1,3 +1,11 @@
+"""
+This script was made during development 
+
+It is not used in the final version
+
+"""
+
+
 import socket
 import sounddevice
 import numpy as np
