@@ -40,7 +40,6 @@ public class ReceiveSound : MonoBehaviour
 
        
         var data = udpServer.Receive(ref groupEP);
-        //Debug.Log("Waiting for sound packet...");
         string stringData = Encoding.UTF8.GetString(data);
         string stringNumbers = Regex.Replace(stringData, "[ ]+", " ")
             .Trim('[', ']');
@@ -55,23 +54,33 @@ public class ReceiveSound : MonoBehaviour
     static void ReceiveAudio()
     {
         UdpClient udpServer = new UdpClient(PORT);
+        udpServer.Client.ReceiveTimeout = 1000; // Set a timeout for receiving data
         IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, PORT);
        
         while (isRunning)
         {
-            float[] samples = getFloatArray(udpServer, groupEP);
-            AUDIO_QUEUE.Enqueue(samples);
-            //Debug.Log("Received audio");
+            try
+            {
+                float[] samples = getFloatArray(udpServer, groupEP);
+                AUDIO_QUEUE.Enqueue(samples);
+            }
+            catch (SocketException ex)
+            {
+                if(ex.SocketErrorCode != SocketError.TimedOut)
+                {
+                    Debug.LogError("SocketException: " + ex.Message);
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("Receive error: " + ex.Message);
+            }
         }
+        // Close the UDP connection when done
+        udpServer.Close();
     }
 
-    public void Stop()
-    {
-        isRunning = false;
-        AudioRetriever.Join(); // Wait for the thread to finish
-    }
-
-    // Update is called once per frame
     void Update()
     {
         if (AUDIO_QUEUE.TryDequeue(out float[] samples))
@@ -86,8 +95,12 @@ public class ReceiveSound : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        // Stop the thread when the application quits
         isRunning = false;
-        AudioRetriever.Join();
+
+        if (AudioRetriever != null && AudioRetriever.IsAlive)
+        {
+            AudioRetriever.Join(); // Now it can exit cleanly
+        }
     }
+
 }
