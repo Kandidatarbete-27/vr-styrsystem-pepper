@@ -2,6 +2,10 @@ using System.Collections.Concurrent;
 using System.Threading;
 using UnityEngine;
 
+// -------------------------------------------------- //
+// This class handles the rotation of the robots head //
+// -------------------------------------------------- //
+
 public class MoveHead
 {
     // Variables for the head movement
@@ -22,6 +26,7 @@ public class MoveHead
 
     public MoveHead(Vector3 firstHead, float angleThreshold, int updateFrequency, ConcurrentQueue<VRData> commandQueue)
     {
+        // Initializes the local variables
         _firstHead       = firstHead;
         _lastHead        = new float[2] { 0f, 0f };
         _angleThreshold  = angleThreshold;
@@ -43,6 +48,7 @@ public class MoveHead
         Debug.Log("MoveHead thread started");
     }
 
+    // Updates the headset position and rotation
     public float UpdateData(Quaternion headsetRotation, Vector3 lastPosition)
     {
         _headsetRotation = headsetRotation;
@@ -85,7 +91,7 @@ public class MoveHead
             Debug.Log("Should update rotation with:");
             Debug.Log(headAngles[1]);
             UpdateRotation(headAngles[1], lastPosition);
-            _firstHead = eulerRotation;
+            _firstHead[1] = eulerRotation[1];
             return;
         }
 
@@ -107,6 +113,7 @@ public class MoveHead
         return;
     }
 
+    // Updates the rotation of the robots body 
     void UpdateRotation(float rotate, Vector3 lastPosition)
     {
         _lastRotation -= rotate;

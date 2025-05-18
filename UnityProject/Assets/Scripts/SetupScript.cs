@@ -3,6 +3,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+// ------------------------------------- //
+// This script manages the setup process //
+// ------------------------------------- //
+
 public class SetupScript : MonoBehaviour
 {
     public GameObject TcpSender;
@@ -111,14 +115,6 @@ public class SetupScript : MonoBehaviour
 
             float armLength = (leftHandHigherPos.y - leftHandLowerPos.y + rightHandHigherPos.y - rightHandLowerPos.y)/2;
 
-            // Normalize the shoulder positions to x axis
-            //leftShoulderDelta.x = Mathf.Sqrt(Mathf.Pow(leftShoulderDelta.x, 2) + Mathf.Pow(leftShoulderDelta.z, 2));
-            //leftShoulderDelta.z = 0;
-
-            // Normalize the shoulder positions to x axis
-            //rightShoulderDelta.x = Mathf.Sqrt(Mathf.Pow(rightShoulderDelta.x, 2) + Mathf.Pow(rightShoulderDelta.z, 2));
-            //rightShoulderDelta.z = 0;
-
             // Send the shoulder positions to the manager
             Debug.Log($"Left: {leftShoulderDelta}, Right: {rightShoulderDelta}");
             Manager.Instance.leftShoulderPos = leftShoulderDelta;
@@ -134,21 +130,6 @@ public class SetupScript : MonoBehaviour
             Invoke("DestroySelf", 10f); // Destroy after 2 seconds
         }
     }
-
-    private void OnButtonPressed() {
-        if (isFirstPhase) {
-            OnConfirmArmsDownPose();
-        }
-        else  {
-            OnConfirmTPose();
-        }
-    }
-
-    void OnDestroy()
-    {
-       // primaryButton.action.performed -= ctx => OnButtonPressed(); // Unsubscribe to prevent memory leaks
-    }
-
 
     void DestroySelf()
     {

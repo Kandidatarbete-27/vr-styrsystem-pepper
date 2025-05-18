@@ -1,4 +1,9 @@
 using UnityEngine;
+
+// -------------------------------------------------------------- //
+// This class manages the transfer of data between setup and main //
+// -------------------------------------------------------------- //
+
 public class Manager : MonoBehaviour
 {
     public static Manager Instance;

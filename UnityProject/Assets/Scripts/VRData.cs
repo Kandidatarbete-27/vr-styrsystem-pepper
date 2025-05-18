@@ -1,5 +1,8 @@
 using System;
 
+// --------------------------------------------------------------------- //
+// This file contains the data structures used to send data to the robot //
+// --------------------------------------------------------------------- //
 
 [Serializable]
 public abstract class VRData

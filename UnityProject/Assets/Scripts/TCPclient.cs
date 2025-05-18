@@ -7,6 +7,10 @@ using System.Threading;
 using System;
 using UnityEngine.UI;
 
+// ---------------------------------------------------------------------------------------------------- //
+// This script handles receiving video data over TCP and displaying it in a Unity UI RawImage component //
+// ---------------------------------------------------------------------------------------------------- //
+
 public class TcpVideoReceiver : MonoBehaviour
 {   // Creates a thread to stop stop unity from freezing waiting to execute commands, and sets up TCP
     Thread thread;

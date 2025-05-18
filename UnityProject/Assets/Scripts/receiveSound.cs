@@ -9,6 +9,10 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 
+// ------------------------------------------------------------------------------------ //
+// This script receives audio data over UDP and plays it using an AudioSource component //
+// ------------------------------------------------------------------------------------ //
+
 public class ReceiveSound : MonoBehaviour
 {
     private static AudioSource audioSource;
@@ -78,5 +82,12 @@ public class ReceiveSound : MonoBehaviour
             audioSource.Play(); 
         }
 
+    }
+
+    private void OnApplicationQuit()
+    {
+        // Stop the thread when the application quits
+        isRunning = false;
+        AudioRetriever.Join();
     }
 }

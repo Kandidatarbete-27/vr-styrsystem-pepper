@@ -1,0 +1,13 @@
+{
+    "useSimulator": false,
+    "noAudio": false,
+    "noSetup": true,
+    "rotationDebug": false,
+    "shoulderDebug": false,
+    "armDebug": false,
+    "angleThreshold": 0.10000000149011612,
+    "moveThreshold": 0.10000000149011612,
+    "userArmLength": 0.4000000059604645,
+    "updateFrequency": 10,
+    "serverIp": "127.0.0.1"
+}

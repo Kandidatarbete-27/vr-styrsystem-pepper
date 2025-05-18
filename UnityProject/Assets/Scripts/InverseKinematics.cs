@@ -1,17 +1,15 @@
 using UnityEngine;
 using MathNet.Numerics.LinearAlgebra;
-using System;
 using MathNet.Numerics.LinearAlgebra.Single;
-using UnityEngine.XR;
-using System.Collections.Generic;
 using System.Linq;
 
+// ----------------------------------------------------------- //
+// Script to calculate the inverse kinematics for Pepper's arm //
+// ----------------------------------------------------------- //
 
 public class InverseKinematics
 {
-    public bool debug = false;
-    public bool debugFinal = false;
-    public bool debugFull = false;
+    // Create an instance of the ForwardKinematics class
     ForwardKinematics fk = new ForwardKinematics(false);
 
     //Pepper's right arm joint limits
@@ -32,96 +30,7 @@ public class InverseKinematics
         (-1.8239f, 1.8239f)
     };
 
-
-    void Start()
-    {
-        float[] testAngles = new float[]
-        {
-            Mathf.PI / 4,
-            Mathf.PI / 6,
-            Mathf.PI / 3,
-            - Mathf.PI / 4,
-            Mathf.PI / 2
-        };
-        float[] startingAngles = new float[]
-        {
-            0,0,0,0,0
-        };
-        if (debug)
-        {
-            fk.debug = true;
-            Debug.Log("Forward Kinematics Test");
-
-            bool isLeftArm = true;
-            var result = fk.CalculateHandPosition(testAngles, isLeftArm);
-
-            Vector3 position = result.Item1;
-            float[,] orientation = result.Item2;
-            float[,] jacobian = result.Item3;
-
-            Debug.Log("Position: " + position);
-            Debug.Log("Orientation: ");
-            for (int i = 0; i < 3; i++)
-            {
-                string row = "";
-                for (int j = 0; j < 3; j++)
-                {
-                    row += orientation[i, j].ToString("F3") + "\t";  // Print with 3 decimal places
-                }
-                Debug.Log(row);
-            }
-
-            Debug.Log("Jacobian Matrix (3x5):");
-            for (int i = 0; i < 3; i++)
-            {
-                string row = "";
-                for (int j = 0; j < 5; j++)
-                {
-                    row += jacobian[i, j].ToString("F3") + "\t";  // Print with 3 decimal places
-                }
-                Debug.Log(row);
-            }
-
-            Debug.Log("Inverse Kinematics Test");
-            Matrix<float> inverseJacobian = InverseJacobian(jacobian);
-
-            Debug.Log("Inverse Jacobian Matrix (5x3):");
-            for (int i = 0; i < 5; i++)
-            {
-                string row = "";
-                for (int j = 0; j < 3; j++)
-                {
-                    row += inverseJacobian[i, j].ToString("F3") + "\t";  // Print with 3 decimal places
-                }
-                Debug.Log(row);
-            }
-
-            if (debugFinal)
-            {
-                float[] finalresult = CalculateJointAngles(position, startingAngles, true, 0.01f);
-                Debug.Log("Final Angles: ");
-                for (int i = 0; i < finalresult.Length; i++)
-                {
-                    Debug.Log(finalresult[i]);
-                }
-            }
-        }
-
-        if (debugFull)
-        {
-            float[] testArr = new float[] { 0f, 0f, 0f, 0f, 0f };
-            Vector3 target = new Vector3(0.39f, 0.117f, 0.0124f);
-            float[] result = CalculateJointAngles(target, testArr, true, 0.05f);
-
-            Debug.Log("Final Angles: ");
-            for (int i = 0; i < result.Length; i++)
-            {
-                Debug.Log(result[i]);
-            }
-        }
-
-    }
-
+    // Enforces joint limits by clamping the angles
     private float[] EnforceJointLimits(float[] angles, bool isLeftArm)
     {
         var limits = isLeftArm ? LeftJointLimits : RightJointLimits;
@@ -132,26 +41,30 @@ public class InverseKinematics
         return angles;
     }
 
+    // Converts a Vector3 to a MathNet Numerics Vector
     public static Vector<float> ToVector(Vector3 vector)
     {
         return Vector<float>.Build.DenseOfArray(new float[] { vector.x, vector.y, vector.z });
     }
 
+    // Main function to calculate joint angles using inverse kinematics
     public float[] CalculateJointAngles(Vector3 targetPosition, float[] startingAngles, bool isLeftArm, float precision = 0.01f, int max_iters = 100)
     {
-        float[] returnAngles = startingAngles.Clone() as float[];
+        float[] returnAngles   = startingAngles.Clone() as float[];
         float[] previousAngles = startingAngles.Clone() as float[];
-        float oldDeltaError = 100f;
-        float damping_factor = 0.1f;
-        bool isFirstTry = true;
-
+        float oldDeltaError    = 100f;
+        float damping_factor   = 0.1f;
+        bool isFirstTry        = true;
+                
         for (int i = 0; i < max_iters; i++)
         {
-            // Perform forward kinematics on the current angles to get the current hand position and inverse jacobian
+            // Perform forward kinematics on the current angles to get the current hand position and Jacobian matrix
             var result = fk.CalculateHandPosition(returnAngles, isLeftArm);
             Vector3 currentPosition = result.Item1;
+            // Pseudo-inverse of the Jacobian matrix
             Matrix<float> invJacobian = InverseJacobian(result.Item3, 0.05f);
 
+            // Calculate the error in position and estimate the change in angles
             Vector3 delta_pos = targetPosition - currentPosition;
             Vector<float> delta_angles = invJacobian * ToVector(delta_pos);
 
@@ -189,7 +102,6 @@ public class InverseKinematics
             float deltaError = Mathf.Abs(delta_pos.x) + Mathf.Abs(delta_pos.y) + Mathf.Abs(delta_pos.z);
             if (deltaError < precision)
             {
-
                 return returnAngles;
             }
             else if (deltaError > oldDeltaError)
@@ -197,6 +109,7 @@ public class InverseKinematics
                 damping_factor *= 0.5f;
             }
 
+            // Check if the change in error is small enough to consider a new random angle
             if (Mathf.Abs(deltaError - oldDeltaError) < precision / 100)
             {
                 if (isFirstTry)
@@ -226,13 +139,11 @@ public class InverseKinematics
             }
             oldDeltaError = deltaError;
         }
-
-        //Debug.LogError("No solution found");
         return previousAngles;
-
     }
 
 
+    // Function to pseudo-invert the Jacobian matrix
     private Matrix<float> InverseJacobian(float[,] jacobian, float damping = 0.01f)
     {
         int rows = jacobian.GetLength(0);

@@ -7,6 +7,9 @@ using System.Net.Sockets;
 using UnityEngine.InputSystem;
 using System.Collections.Concurrent;
 
+// ----------------------------------------------------- //
+// This is the main program that sends data to the robot //
+// ----------------------------------------------------- //
 
 public class TcpSender : MonoBehaviour
 {
@@ -27,7 +30,7 @@ public class TcpSender : MonoBehaviour
     private NetworkStream stream;
 
     // Values for the other computer's ip and port
-    public string serverIp = "192.168.0.108";
+    public string serverIp = "127.0.0.1";
     private int serverPort = 55002;
 
     // Start values for position and rotation of headset
@@ -76,6 +79,7 @@ public class TcpSender : MonoBehaviour
     // The start function which is run first
     void Start()
     {
+        // Either gets the values from the manager or sets them to default
         if (!noSetup)
         {
             initialLeftShoulderPos = Manager.Instance.leftShoulderPos;
@@ -87,12 +91,12 @@ public class TcpSender : MonoBehaviour
         {
             initialLeftShoulderPos = new Vector3(-0.15f, -0.15f, 0f);
             initialRightShoulderPos = new Vector3(0.15f, -0.15f, 0f);
-            userArmLength = 0.40f;
+            if(userArmLength <= 0.1) userArmLength = 0.4f;
         }
 
         startingPosition = headset.position;
 
-        // Initialize MoveArm with input actions
+        // Initialize MoveArm with input actions and initial values
         moveArm = new MoveArm(CloseRHand, CloseLHand, commandQueue, userArmLength, updateFrequency);
 
         // Initialize MoveHead with initial values
@@ -133,7 +137,7 @@ public class TcpSender : MonoBehaviour
             {   // Only proceeds if the equipment is connected
                 if (headset != null && RightController != null && LeftController != null)
                 {
-                    // If this is the firt "Update()" starting values are saved
+                    // If this is the first "Update()" starting values are saved
                     if (FirstTime)
                     {
                         lastPosition = headset.position - startingPosition;
@@ -215,9 +219,6 @@ public class TcpSender : MonoBehaviour
             {
                 try
                 {
-                    
-                    
-
                     // Converts data to "json"
                     string json = JsonUtility.ToJson(data);
 
@@ -284,7 +285,6 @@ public class TcpSender : MonoBehaviour
         isRunning = false;
         isConnected = false;
 
-
         try
         {
             // closes the TCP client and "stream"
@@ -308,8 +308,7 @@ public class TcpSender : MonoBehaviour
     // Function which is run if Unity is stopped
     void OnApplicationQuit()
     {
-        /////////////////////////////////
-        // Timmys nya grej
+        // Sends quit message to the python program controlling Pepper
         if (isConnected)
         {
             try
@@ -326,11 +325,11 @@ public class TcpSender : MonoBehaviour
             }
         }
 
+        // Stops all movement threads
         moveArm.Stop();
         moveHead.Stop();
         moveBody.Stop();
 
-        //////////////////////////////////
         // Sets "isRunning" to false which will stop the other threads
         isRunning = false;
         Debug.Log("Stopping threads");

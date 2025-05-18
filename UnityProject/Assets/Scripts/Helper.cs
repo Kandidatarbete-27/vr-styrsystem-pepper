@@ -1,9 +1,15 @@
 using UnityEngine;
 using System;
 
+// -------------------------------------------- //
+// Helper class that contains utility functions //
+// -------------------------------------------- //
+
 public class Helper
 {
-   public static void UpdateAngles(float[] oldAngles, float[] newAngles)
+
+    // Updates an array of angles in-place
+    public static void UpdateAngles(float[] oldAngles, float[] newAngles)
     {
         for (int i = 0; i < oldAngles.Length; i++)
         {
@@ -11,6 +17,7 @@ public class Helper
         }
     }
 
+    // Checks if the angles have changed over a certain threshold
     public static bool HasAngleChanged(float[] currentAngles, float[] lastAngles, float threshold)
     {
         // Checks if any angles have changed from the last time, if so returns true
@@ -24,6 +31,7 @@ public class Helper
         return false;
     }
 
+    // Checks if the position has changed over a certain threshold
     public static bool PositionHasChanged(Vector3 ChangedPos, float threshold)
     {
         // Compares the values to the threshold

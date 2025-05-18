@@ -1,78 +1,33 @@
 using UnityEngine;
 
+// ------------------------------------------------------------------------------------------- //
+// This script calculates the forward kinematics and Jacobian matrix for the Pepper robot arm. //
+// ------------------------------------------------------------------------------------------- //
+
 public class ForwardKinematics
 {
-
+    // Debug flag
     public bool debug = false;
 
-    private float shoulderOffset = 0.15f;
+    // Joint lengths for the Pepper robot arm
     private float shoulderSideOffset = 0.015f;
-    private float upperArmLength = 0.18f;
-    private float foreArmLength = 0.15f;
-    private float wristOffset = 0.07f;
-    private float handOffset = 0.03f;
+    private float upperArmLength     = 0.18f;
+    private float foreArmLength      = 0.15f;
+    private float wristOffset        = 0.07f;
+    private float handOffset         = 0.03f;
 
     public float[] armAngles = new float[5];
 
+    // Constructor
     public ForwardKinematics(bool setDebug) {
         debug = setDebug;
     }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        if (debug)
-        {
-            Debug.Log("Forward Kinematics Test");
-            float[] testAngles = new float[]
-            {
-                Mathf.PI / 4,
-                Mathf.PI / 6,
-                Mathf.PI / 3,
-                - Mathf.PI / 4,
-                Mathf.PI / 2
-            };
-
-
-            bool isLeftArm = true;
-
-            var result = CalculateHandPosition(testAngles, isLeftArm);
-
-            Vector3 position = result.Item1;
-            float[,] orientation = result.Item2;
-            float[,] jacobian = result.Item3;
-
-            Debug.Log("Position: " + position);
-            Debug.Log("Orientation: ");
-            for (int i = 0; i < 3; i++)
-            {
-                string row = "";
-                for (int j = 0; j < 3; j++)
-                {
-                    row += orientation[i, j].ToString("F3") + "\t";  // Print with 3 decimal places
-                }
-                Debug.Log(row);
-            }
-
-            Debug.Log("Jacobian Matrix (3x5):");
-            for (int i = 0; i < 3; i++)
-            {
-                string row = "";
-                for (int j = 0; j < 5; j++)
-                {
-                    row += jacobian[i, j].ToString("F3") + "\t";  // Print with 3 decimal places
-                }
-                Debug.Log(row);
-            }
-        }
-    }
-
-
     public (Vector3, float[,], float[,]) CalculateHandPosition(float[] angles, bool isLeftArm)
     {
-        float convertedShoulderOffset = isLeftArm ? shoulderOffset : -shoulderOffset;
+        // Inverts sideways shoulder offset for right arm
         float convertedShoulderSideOffset = isLeftArm ? shoulderSideOffset : -shoulderSideOffset;
 
+        // Generate transformation matrices for each joint
         Matrix4x4 T1 = TransformY(-angles[0], 0, 0, 0);                                                      // Shoulder pitch 
         Matrix4x4 T2 = TransformZ(angles[1], 0, 0, 0);                                                       // Shoulder roll 
         Matrix4x4 T3 = TransformY(9.0f / 180.0f * Mathf.PI, upperArmLength, convertedShoulderSideOffset, 0); // Upper arm + angular offset to forearm
@@ -91,8 +46,8 @@ public class ForwardKinematics
         Matrix4x4 T7Abs = T6Abs * T7;
 
         // Extract position and orientation
-        Vector3 position = T7Abs.GetColumn(3);   // The calculated position
-        float[,] rotation = new float[3, 3];
+        Vector3 position = T7Abs.GetColumn(3);   // The calculated position is in the upper right corner of the matrix
+        float[,] rotation = new float[3, 3];     // The calculated orientation is in the upper left corner of the matrix
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 3; j++)
@@ -113,7 +68,6 @@ public class ForwardKinematics
         float[,] jacobian = new float[3, 5];
 
         //Calculate offset vectors
-        Vector4 offsetT1 = shoulderOffset * T1Abs.GetColumn(1);
         Vector4 offsetT3 = T3Abs * new Vector4(upperArmLength, shoulderSideOffset, 0, 0);
         Vector4 offsetT6 = foreArmLength * T6Abs.GetColumn(0);
         Vector4 offsetT7 = T6Abs * new Vector4(wristOffset, 0, -handOffset, 0);
@@ -133,8 +87,9 @@ public class ForwardKinematics
         Vector4 vec4 = vec5;
         Vector4 vec3 = vec4 + offsetT3;
         Vector4 vec2 = vec3;
-        Vector4 vec1 = vec2 + offsetT1;
+        Vector4 vec1 = vec2;
 
+        // Calculate each column of the Jacobian matrix
         Vector3 J1 = CrossProduct(j1, vec1);
         Vector3 J2 = CrossProduct(j2, vec2);
         Vector3 J3 = CrossProduct(j4, vec4);
@@ -152,6 +107,7 @@ public class ForwardKinematics
         return jacobian;
     }
 
+    // Function to compute the cross product of two vectors
     static Vector3 CrossProduct(Vector4 j, Vector4 v)
     {
         return new Vector3(
@@ -160,6 +116,12 @@ public class ForwardKinematics
             j.x * v.y - j.y * v.x   // t2
         );
     }
+
+
+
+    // ---------------------------------------------------- //
+    // Model for transformation around the X, Y, and Z axes //
+    // ---------------------------------------------------- //
 
     Matrix4x4 TransformX(float angle, float x, float y, float z)
     {

@@ -3,6 +3,10 @@ using UnityEngine.InputSystem;
 using System.Collections.Concurrent;
 using System.Threading;
 
+// ------------------------------------------------------------------- //
+// This class  handles the calculation of arm angles for Pepper's arms //
+// ------------------------------------------------------------------- //
+
 public class MoveArm
 {
     // Debug flag
@@ -140,20 +144,24 @@ public class MoveArm
             {
                 float shoulderPitch = Mathf.Atan2(scaledDirection.y, new Vector2(scaledDirection.x, scaledDirection.z).magnitude);
                 float shoulderRoll = Mathf.Atan2(scaledDirection.x, scaledDirection.z);
-                //float shoulderPitch = Mathf.Atan2(scaledDirection.z, scaledDirection.y);
-                //float shoulderRoll = Mathf.Asin(scaledDirection.x / scaledDirection.magnitude);
                 return new float[] { -shoulderPitch, -shoulderRoll, 0, 0, 0 };
             }
+
         }
 
         //If the arm is too close to the body, scale the direction vector to a point pepper can reach
         if (scaledDirection.magnitude < 0.27f)
         {
-            scaledDirection = scaledDirection.normalized * 0.27f;
+            if(scaledDirection.x > -0.13f && scaledDirection.x < 0.13f)
+            {
+                float z = Mathf.Sqrt(0.784f - Mathf.Pow(scaledDirection.x,2) - Mathf.Pow(scaledDirection.y, 2));
+                scaledDirection = new Vector3(scaledDirection.x, scaledDirection.y, z);
+            }
+            else
+            {
+                scaledDirection = scaledDirection.normalized * 0.27f;
+            }
         }
-
-        //Estimate the elbow roll based on law of cosines
-
 
         // Correct axes to match Pepper's coordinate system
         Vector3 correctedAxes = new Vector3(scaledDirection.z, -scaledDirection.x, scaledDirection.y);

@@ -2,6 +2,9 @@ using System.Collections.Concurrent;
 using System.Threading;
 using UnityEngine;
 
+// ------------------------------------------------------------------------------------------ //
+// This class handles the movement of the robot based on the headset's position and rotation. //
+// ------------------------------------------------------------------------------------------ //
 
 public class MoveBody
 {
@@ -24,7 +27,8 @@ public class MoveBody
 
     public MoveBody(Vector3 firstRotation, Vector3 firstMove, ConcurrentQueue<VRData> commandQueue, float moveThreshold, int updateFrequency)
     {
-        _headsetPosition   = firstMove;
+        // Initializes the local variables
+        _headsetPosition = firstMove;
         _firstMove         = firstMove;
         _lastPosition      = new Vector3(0, 0, 0);
         _lastRotation      = 0;
@@ -36,7 +40,7 @@ public class MoveBody
         _updateFrequency   = updateFrequency;
         _commandQueue      = commandQueue;
 
-
+        // Starts the thread
         _updateThread = new Thread(UpdatemoveLoop)
         {
             IsBackground = true
@@ -46,6 +50,7 @@ public class MoveBody
         Debug.Log("MoveBody thread started");
     }
 
+    // Updates the headset position and rotation
     public Vector3 UpdateData(Vector3 headsetPosition, float lastRotation)
     {
         _headsetPosition = headsetPosition;
@@ -56,6 +61,7 @@ public class MoveBody
         return _lastPosition;
     }
 
+    // Calls the UpdateMove function in a loop
     void UpdatemoveLoop()
     {
         while (_running)
@@ -65,6 +71,7 @@ public class MoveBody
         }
     }
 
+    // Logic to update the movement data
     void UpdateMove()
     {
         //Extracts the positional data from the headset and subtracts the intial position
